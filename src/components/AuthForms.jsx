@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function Input({ label, type = 'text', value, onChange, placeholder }) {
   return (
@@ -25,10 +25,15 @@ function Section({ title, children }) {
 }
 
 export default function AuthForms({ role = 'customer' }) {
-  const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+  const [baseUrl, setBaseUrl] = useState('')
   const [mode, setMode] = useState('login')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('dropline.backendUrl')
+    setBaseUrl(saved || import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000')
+  }, [])
 
   const [form, setForm] = useState({
     // common
@@ -120,10 +125,6 @@ export default function AuthForms({ role = 'customer' }) {
             <h3 className="text-2xl font-bold text-slate-900">{mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب'}</h3>
             <p className="text-slate-600 text-sm mt-1">الدور المختار: {role}</p>
           </div>
-          <div className="bg-white/70 backdrop-blur rounded-xl border border-slate-200 p-1">
-            <button onClick={() => setMode('login')} className={`px-3 py-1 rounded-lg text-sm ${mode==='login' ? 'bg-blue-600 text-white' : ''}`}>دخول</button>
-            <button onClick={() => setMode('register')} className={`px-3 py-1 rounded-lg text-sm ${mode==='register' ? 'bg-blue-600 text-white' : ''}`}>إنشاء</button>
-          </div>
         </div>
 
         {message && (
@@ -174,10 +175,17 @@ export default function AuthForms({ role = 'customer' }) {
             </Section>
           )}
 
-          <div className="flex justify-end">
-            <button disabled={loading} className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50">
-              {loading ? 'جاري المعالجة...' : (mode==='login' ? 'دخول' : 'إنشاء حساب')}
-            </button>
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm text-slate-600">
+              إذا واجهت مشكلة اتصال، تأكد من عنوان الخادم الخلفي في صفحة الاختبار (/test) أو خزّنه محلياً.
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={()=>setMode('login')} className={`px-4 py-2 rounded-xl border ${mode==='login' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-200'}`}>دخول</button>
+              <button type="button" onClick={()=>setMode('register')} className={`px-4 py-2 rounded-xl border ${mode==='register' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-200'}`}>إنشاء</button>
+              <button disabled={loading} className="px-6 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50">
+                {loading ? 'جاري المعالجة...' : (mode==='login' ? 'دخول' : 'إنشاء حساب')}
+              </button>
+            </div>
           </div>
         </form>
 
